@@ -1,0 +1,66 @@
+name: flink-cdc-mysql-multi
+parallelism: 2
+checkpoint:
+  dir: /Users/xuanbo/temp/checkpoint
+  interval: 60000
+  timeout: 600000
+savepoint:
+  enabled: true
+pipeline:
+  # MySQL CDC源端
+  - |
+    CREATE TABLE t_user (
+      id INT,
+      name STRING,
+      username STRING,
+      email STRING,
+      password STRING,
+      created_at TIMESTAMP(3),
+      PRIMARY KEY (id) NOT ENFORCED
+    ) WITH (
+      'connector' = 'mysql-cdc',
+      'hostname' = 'localhost',
+      'port' = '3306',
+      'username' = 'root',
+      'password' = '123456',
+      'database-name' = 'test',
+      'table-name' = 'user'
+    )
+  # MySQL目标端
+  - |
+    CREATE TABLE t_user_mysql (
+      id INT,
+      name STRING,
+      username STRING,
+      email STRING,
+      password STRING,
+      created_at TIMESTAMP(3),
+      PRIMARY KEY (id) NOT ENFORCED
+    ) WITH (
+       'connector' = 'jdbc',
+       'url' = 'jdbc:mysql://localhost:3306/test?serverTimezone=Asia/Shanghai&allowMultiQueries=true&autoReconnect=true&failOverReadOnly=false&useUnicode=true&characterEncoding=utf8',
+       'username' = 'root',
+       'password' = '123456',
+       'table-name' = 'user_copy'
+    )
+  # ES目标端
+  - |
+    CREATE TABLE t_user_es (
+      id INT,
+      name STRING,
+      username STRING,
+      email STRING,
+      password STRING,
+      created_at TIMESTAMP(3),
+      PRIMARY KEY (id) NOT ENFORCED
+    ) WITH (
+       'connector' = 'elasticsearch-7',
+       'hosts' = 'http://192.168.101.32:9200',
+       'username' = 'root',
+       'password' = '123456',
+       'index' = 'user_cdc'
+    )
+  # MySQL -> MySQL
+  - INSERT INTO t_user_mysql SELECT id, name, username, email, password, created_at FROM t_user
+  # MySQL -> ES
+  - INSERT INTO t_user_es SELECT id, name, username, email, password, created_at FROM t_user

@@ -1,0 +1,44 @@
+name: flink-cdc-mysql-sqlserver
+parallelism: 1
+checkpoint:
+  dir: /Users/xuanbo/temp/checkpoint
+  interval: 60000
+  timeout: 600000
+savepoint:
+  enabled: true
+pipeline:
+  - |
+    CREATE TABLE t_user (
+      id INT,
+      name STRING,
+      username STRING,
+      email STRING,
+      password STRING,
+      created_at TIMESTAMP(3),
+      PRIMARY KEY (id) NOT ENFORCED
+    ) WITH (
+      'connector' = 'mysql-cdc',
+      'hostname' = 'localhost',
+      'port' = '3306',
+      'username' = 'root',
+      'password' = '123456',
+      'database-name' = 'test',
+      'table-name' = 'user'
+    )
+  - |
+    CREATE TABLE t_user_copy (
+      id INT,
+      name STRING,
+      username STRING,
+      email STRING,
+      password STRING,
+      created_at TIMESTAMP(3),
+      PRIMARY KEY (id) NOT ENFORCED
+    ) WITH (
+       'connector' = 'jdbc',
+       'url' = 'jdbc:sqlserver://192.168.101.22:1433;DatabaseName=testdb',
+       'username' = 'sa',
+       'password' = 'yourStrong(!)Password',
+       'table-name' = 'user_cdc'
+    )
+  - INSERT INTO t_user_copy SELECT id, name, username, email, password, created_at FROM t_user

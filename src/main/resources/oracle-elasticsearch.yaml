@@ -1,0 +1,39 @@
+name: flink-cdc-oracle-elasticsearch
+parallelism: 1
+checkpoint:
+  dir: /Users/xuanbo/temp/checkpoint
+  interval: 60000
+  timeout: 600000
+savepoint:
+  enabled: true
+pipeline:
+  - |
+    CREATE TABLE product (
+      ID INT,
+      NAME STRING,
+      DESCRIPTION STRING,
+      PRIMARY KEY (ID) NOT ENFORCED
+    ) WITH (
+      'connector' = 'oracle-cdc',
+      'hostname' = '192.168.101.29',
+      'port' = '1521',
+      'username' = 'flinkuser',
+      'password' = 'flinkpw',
+      'database-name' = 'XE',
+      'schema-name' = 'flinkuser',
+      'table-name' = 'products'
+    )
+  - |
+    CREATE TABLE product_copy (
+      id INT,
+      name STRING,
+      description STRING,
+      PRIMARY KEY (id) NOT ENFORCED
+    ) WITH (
+       'connector' = 'elasticsearch-7',
+       'hosts' = 'http://192.168.101.32:9200',
+       'username' = 'root',
+       'password' = '123456',
+       'index' = 'product_cdc'
+    )
+  - INSERT INTO product_copy SELECT ID, NAME, DESCRIPTION FROM product
