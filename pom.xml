@@ -30,7 +30,7 @@
         <orai18n.version>12.1.0.2.0</orai18n.version>
         <sqlserver.version>4.0</sqlserver.version>
         <yaml.version>1.29</yaml.version>
-        <log4j2.version>2.14.1</log4j2.version>
+        <log4j2.version>2.16.0</log4j2.version>
         <lombok.version>1.18.20</lombok.version>
         <junit.version>4.12</junit.version>
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
