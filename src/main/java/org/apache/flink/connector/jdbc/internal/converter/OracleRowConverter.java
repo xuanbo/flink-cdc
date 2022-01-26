@@ -32,7 +32,7 @@ public class OracleRowConverter extends AbstractJdbcRowConverter {
 
     @Override
     public String converterName() {
-        return "SQLServer";
+        return "Oracle";
     }
 
     public OracleRowConverter(RowType rowType) {

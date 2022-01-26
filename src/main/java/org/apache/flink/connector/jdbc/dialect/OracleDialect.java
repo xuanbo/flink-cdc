@@ -1,7 +1,7 @@
 package org.apache.flink.connector.jdbc.dialect;
 
 import org.apache.flink.connector.jdbc.internal.converter.JdbcRowConverter;
-import org.apache.flink.connector.jdbc.internal.converter.SQLServerRowConverter;
+import org.apache.flink.connector.jdbc.internal.converter.OracleRowConverter;
 import org.apache.flink.table.types.logical.LogicalTypeRoot;
 import org.apache.flink.table.types.logical.RowType;
 
@@ -37,7 +37,7 @@ public class OracleDialect extends AbstractDialect {
 
     @Override
     public JdbcRowConverter getRowConverter(RowType rowType) {
-        return new SQLServerRowConverter(rowType);
+        return new OracleRowConverter(rowType);
     }
 
     @Override
