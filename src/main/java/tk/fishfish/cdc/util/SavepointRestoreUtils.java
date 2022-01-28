@@ -19,6 +19,9 @@ public final class SavepointRestoreUtils {
     }
 
     public static String getSavepointRestore(String checkpointDir) {
+        if (StringUtils.startsWith(checkpointDir, "hdfs://")) {
+            return null;
+        }
         File file = new File(checkpointDir);
         if (!file.exists() || !file.isDirectory()) {
             return null;

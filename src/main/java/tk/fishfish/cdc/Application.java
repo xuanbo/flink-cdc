@@ -1,6 +1,7 @@
 package tk.fishfish.cdc;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.environment.CheckpointConfig;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -39,7 +40,8 @@ public class Application {
         Job.Checkpoint checkpoint = job.getCheckpoint();
         String checkpointDir = Paths.get(checkpoint.getDir(), job.getName()).toString();
 
-        // 获取最新的 checkpoint 恢复任务
+        // 获取最新的checkpoint恢复任务
+        // 通过修改源码后Local模式可以控制，但是Cluster则需要手动开启 -s 参数
         if (BooleanUtils.toBoolean(job.getSavepoint().getEnabled())) {
             String savepointDir = SavepointRestoreUtils.getSavepointRestore(checkpointDir);
             if (savepointDir != null) {
@@ -52,7 +54,11 @@ public class Application {
         env.setParallelism(job.getParallelism());
         CheckpointConfig config = env.getCheckpointConfig();
         // 设置checkpoint的存储路径
-        env.getCheckpointConfig().setCheckpointStorage("file://" + checkpointDir);
+        if (!StringUtils.startsWith(checkpointDir, "hdfs://")) {
+            checkpointDir = "file://" + checkpointDir;
+        }
+        LOGGER.info("Checkpoint storage: {}", checkpointDir);
+        env.getCheckpointConfig().setCheckpointStorage(checkpointDir);
         // 任务流取消和故障时会保留Checkpoint数据，以便根据实际需要恢复到指定的Checkpoint
         config.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION);
         // 设置checkpoint的周期, 每隔 60_000 ms进行启动一个检查点

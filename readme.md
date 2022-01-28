@@ -82,9 +82,33 @@ mvn clean package -DskipTests
 java -Xms1g -Xmx1g -jar /some/path/flink-cdc.jar /some/path/job.yaml
 ```
 
-### 集群
+### 集群（Standalone）
 
-暂未处理。
+> 即 Flink standalone 模式
+
+打包：
+
+```shell
+mvn clean package -DskipTests -Pcluster
+
+# target/flink-cdc-1.0.0-SNAPSHOT.jar
+# mv target/flink-cdc-1.0.0-SNAPSHOT.jar /some/path/flink-cdc.jar
+```
+
+使用：
+
+```shell
+# (1) Start Cluster
+./bin/start-cluster.sh
+
+# (2) You can now access the Flink Web Interface on http://localhost:8081
+
+# (3) Submit job
+./bin/flink run /some/path/flink-cdc.jar /some/path/job.yaml
+
+# (4) Stop the cluster
+./bin/stop-cluster.sh
+```
 
 ## CDC任务
 
